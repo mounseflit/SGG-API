@@ -400,23 +400,17 @@
                     <section id="french-api">
                         <div class="section-title">
                             <h2>French Bulletin API</h2>
-                            <p>Access the latest French language publications of the Bulletin Officiel</p>
+                            <p>Access the latest and historical French language publications of the Bulletin Officiel</p>
                         </div>
-                        
                         <div class="endpoint french">
-                            <h3><i class="fas fa-file-pdf"></i> French Bulletin Metadata <span class="language-label lang-fr">French</span></h3>
-                            <p>Retrieve comprehensive metadata about the most recent French Bulletin Officiel publication.</p>
-                            
+                            <h3><i class="fas fa-file-pdf"></i> Latest French Bulletin Metadata <span class="language-label lang-fr">French</span></h3>
+                            <p>Retrieve metadata about the most recent French Bulletin Officiel publication.</p>
                             <div class="endpoint-url">
                                 <span class="method-badge">GET</span>
                                 <code>/api/BO/FR</code>
-                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/BO/FR')">
-                                    Copy URL
-                                </button>
+                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/BO/FR')">Copy URL</button>
                             </div>
-                            
-                            <p>This endpoint returns key metadata including the bulletin ID, number, publication date, and direct URL.</p>
-                            
+                            <p>Returns bulletin ID, number, publication date, and direct PDF URL.</p>
                             <div class="response-example">
                                 <h4>Example Response:</h4>
                                 <pre>{
@@ -426,59 +420,61 @@
   "BoUrl": "https://www.sgg.gov.ma/Portals/0/BO/2023/BO_7214_Fr.pdf"
 }</pre>
                             </div>
-                            
-                            <a href="/api/BO/FR" class="try-btn" target="_blank">
-                                <i class="fas fa-external-link-alt"></i> Try this endpoint
-                            </a>
+                            <a href="/api/BO/FR" class="try-btn" target="_blank"><i class="fas fa-external-link-alt"></i> Try this endpoint</a>
                         </div>
-                        
                         <div class="endpoint french">
                             <h3><i class="fas fa-align-left"></i> French Bulletin Full Text <span class="language-label lang-fr">French</span></h3>
                             <p>Extract the complete textual content from the latest French Bulletin Officiel.</p>
-                            
                             <div class="endpoint-url">
                                 <span class="method-badge">GET</span>
                                 <code>/api/BO/Text/FR</code>
-                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/BO/Text/FR')">
-                                    Copy URL
-                                </button>
+                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/BO/Text/FR')">Copy URL</button>
                             </div>
-                            
-                            <p>This endpoint performs advanced text extraction from the PDF document, making the content available for search, analysis, or integration into your applications.</p>
-                            
+                            <p>Advanced text extraction from the PDF document for search, analysis, or integration.</p>
                             <div class="response-example">
                                 <h4>Example Response:</h4>
                                 <pre>{
   "text": "ROYAUME DU MAROC BULLETIN OFFICIEL Édition de traduction officielle...[truncated]"
 }</pre>
                             </div>
-                            
-                            <a href="/api/BO/Text/FR" class="try-btn" target="_blank">
-                                <i class="fas fa-external-link-alt"></i> Try this endpoint
-                            </a>
+                            <a href="/api/BO/Text/FR" class="try-btn" target="_blank"><i class="fas fa-external-link-alt"></i> Try this endpoint</a>
+                        </div>
+                        <div class="endpoint french">
+                            <h3><i class="fas fa-history"></i> All French Bulletins <span class="language-label lang-fr">French</span></h3>
+                            <p>Retrieve metadata for all available French Bulletin Officiel publications.</p>
+                            <div class="endpoint-url">
+                                <span class="method-badge">GET</span>
+                                <code>/api/BO/ALL/FR</code>
+                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/BO/ALL/FR')">Copy URL</button>
+                            </div>
+                            <p>Returns an array of metadata objects for each bulletin, including ID, number, date, and PDF URL.</p>
+                            <div class="response-example">
+                                <h4>Example Response:</h4>
+                                <pre>[{
+  "BoId": 5789,
+  "BoNum": "7214",
+  "BoDate": "2023-06-22T00:00:00.000Z",
+  "BoUrl": "https://www.sgg.gov.ma/Portals/0/BO/2023/BO_7214_Fr.pdf"
+}, ...]</pre>
+                            </div>
+                            <a href="/api/BO/ALL/FR" class="try-btn" target="_blank"><i class="fas fa-external-link-alt"></i> Try this endpoint</a>
                         </div>
                     </section>
                     
                     <section id="arabic-api">
                         <div class="section-title">
                             <h2>Arabic Bulletin API</h2>
-                            <p>Access the latest Arabic language publications of the Bulletin Officiel</p>
+                            <p>Access the latest and historical Arabic language publications of the Bulletin Officiel</p>
                         </div>
-                        
                         <div class="endpoint arabic">
-                            <h3><i class="fas fa-file-pdf"></i> Arabic Bulletin Metadata <span class="language-label lang-ar">Arabic</span></h3>
-                            <p>Retrieve comprehensive metadata about the most recent Arabic Bulletin Officiel publication.</p>
-                            
+                            <h3><i class="fas fa-file-pdf"></i> Latest Arabic Bulletin Metadata <span class="language-label lang-ar">Arabic</span></h3>
+                            <p>Retrieve metadata about the most recent Arabic Bulletin Officiel publication.</p>
                             <div class="endpoint-url">
                                 <span class="method-badge">GET</span>
                                 <code>/api/BO/AR</code>
-                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/BO/AR')">
-                                    Copy URL
-                                </button>
+                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/BO/AR')">Copy URL</button>
                             </div>
-                            
-                            <p>This endpoint returns key metadata including the bulletin ID, number, publication date, and direct URL for Arabic publications.</p>
-                            
+                            <p>Returns bulletin ID, number, publication date, and direct PDF URL.</p>
                             <div class="response-example">
                                 <h4>Example Response:</h4>
                                 <pre>{
@@ -488,36 +484,44 @@
   "BoUrl": "https://www.sgg.gov.ma/Portals/1/BO/2023/BO_7214_Ar.pdf"
 }</pre>
                             </div>
-                            
-                            <a href="/api/BO/AR" class="try-btn" target="_blank">
-                                <i class="fas fa-external-link-alt"></i> Try this endpoint
-                            </a>
+                            <a href="/api/BO/AR" class="try-btn" target="_blank"><i class="fas fa-external-link-alt"></i> Try this endpoint</a>
                         </div>
-                        
                         <div class="endpoint arabic">
                             <h3><i class="fas fa-align-right"></i> Arabic Bulletin Full Text <span class="language-label lang-ar">Arabic</span></h3>
                             <p>Extract the complete textual content from the latest Arabic Bulletin Officiel.</p>
-                            
                             <div class="endpoint-url">
                                 <span class="method-badge">GET</span>
                                 <code>/api/BO/Text/AR</code>
-                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/BO/Text/AR')">
-                                    Copy URL
-                                </button>
+                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/BO/Text/AR')">Copy URL</button>
                             </div>
-                            
-                            <p>This endpoint handles complex Arabic text extraction from PDF documents with proper RTL support, making the content available for search, analysis, or integration into your applications.</p>
-                            
+                            <p>Complex Arabic text extraction from PDF documents with proper RTL support for search, analysis, or integration.</p>
                             <div class="response-example">
                                 <h4>Example Response:</h4>
                                 <pre>{
   "text": "المملكة المغربية الجريدة الرسمية النشرة العامة...[truncated]"
 }</pre>
                             </div>
-                            
-                            <a href="/api/BO/Text/AR" class="try-btn" target="_blank">
-                                <i class="fas fa-external-link-alt"></i> Try this endpoint
-                            </a>
+                            <a href="/api/BO/Text/AR" class="try-btn" target="_blank"><i class="fas fa-external-link-alt"></i> Try this endpoint</a>
+                        </div>
+                        <div class="endpoint arabic">
+                            <h3><i class="fas fa-history"></i> All Arabic Bulletins <span class="language-label lang-ar">Arabic</span></h3>
+                            <p>Retrieve metadata for all available Arabic Bulletin Officiel publications.</p>
+                            <div class="endpoint-url">
+                                <span class="method-badge">GET</span>
+                                <code>/api/BO/ALL/AR</code>
+                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/BO/ALL/AR')">Copy URL</button>
+                            </div>
+                            <p>Returns an array of metadata objects for each bulletin, including ID, number, date, and PDF URL.</p>
+                            <div class="response-example">
+                                <h4>Example Response:</h4>
+                                <pre>[{
+  "BoId": 5790,
+  "BoNum": "7214",
+  "BoDate": "2023-06-22T00:00:00.000Z",
+  "BoUrl": "https://www.sgg.gov.ma/Portals/1/BO/2023/BO_7214_Ar.pdf"
+}, ...]</pre>
+                            </div>
+                            <a href="/api/BO/ALL/AR" class="try-btn" target="_blank"><i class="fas fa-external-link-alt"></i> Try this endpoint</a>
                         </div>
                     </section>
                     

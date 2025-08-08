@@ -6,6 +6,7 @@
     <title>BO Connect | Official Bulletin API</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         :root {
             --primary: #3498db;
@@ -252,18 +253,37 @@
             <p class="subtitle">Access official bulletin data instantly through our API</p>
 
             <div class="control-panel">
-                <button id="fetchDataFr" class="button">
-                    <i class="fas fa-database"></i> Fetch French Data
-                </button>
-                <button id="fetchDataAr" class="button button-ar">
-                    <i class="fas fa-database"></i> Fetch Arabic Data
-                </button>
-                <button id="fetchtextFr" class="button button-text">
-                    <i class="fas fa-file-alt"></i> Get French Text
-                </button>
-                <button id="fetchtextAr" class="button button-text">
-                    <i class="fas fa-file-alt"></i> Get Arabic Text
-                </button>
+                <div style="width: 100%; margin-bottom: 15px;">
+                    <h3 style="margin-bottom: 10px; color: var(--primary);">French Documents</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                        
+                        <button id="fetchDataAllFr" class="button button-text">
+                            <i class="fas fa-list-ul"></i> Get All Documents
+                        </button>
+                        <button id="fetchDataFr" class="button">
+                            <i class="fas fa-database"></i> Fetch Latest BO
+                        </button>
+                        <button id="fetchtextFr" class="button button-ar">
+                            <i class="fas fa-file-alt"></i> Get Latest BO Text
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="width: 100%;">
+                    <h3 style="margin-bottom: 10px; color: var(--secondary);">Arabic Documents</h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px;">
+                        
+                        <button id="fetchDataAllAr" class="button button-text">
+                            <i class="fas fa-list-ul"></i> Get All Documents
+                        </button>
+                        <button id="fetchDataAr" class="button">
+                            <i class="fas fa-database"></i> Fetch Latest BO
+                        </button>
+                        <button id="fetchtextAr" class="button button-ar">
+                            <i class="fas fa-file-alt"></i> Get Latest BO Text
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div id="result" class="result-container">
@@ -277,11 +297,13 @@
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2023 BOConnect - Your gateway to official bulletin data</p>
+            <p>&copy; 2025 BOConnect - Your gateway to official bulletin data</p>
         </div>
     </footer>
 
     <script>
+        
+        // Show loading spinner
         function showLoading() {
             document.getElementById('result').innerHTML = `
                 <div class="loading">
@@ -289,6 +311,9 @@
                 </div>
             `;
         }
+
+////////////////////////// Single Latest Document //////////////////////////
+
 
         document.getElementById('fetchDataAr').addEventListener('click', async () => {
             showLoading();
@@ -319,7 +344,7 @@
                     </div>
                     <div class="data-card">
                         <h3>Date</h3>
-                        <div class="data-value">${new Date(data.BoDate).toLocaleDateString('ar-SA')}</div>
+                        <div class="data-value">${new Date(data.BoDate).toLocaleDateString('fr-FR')}</div>
                     </div>
                     <div class="data-card">
                         <h3>Raw Data</h3>
@@ -386,6 +411,120 @@
             }
         });
 
+
+////////////////////////// All Documents //////////////////////////
+
+
+        document.getElementById('fetchDataAllAr').addEventListener('click', async () => {
+            showLoading();
+            try {
+                const response = await fetch('/api/BO/ALL/AR');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const resultDiv = document.getElementById('result');
+
+                resultDiv.innerHTML = `
+                    <div class="result-header">
+                        <span class="result-title">Arabic BO Data</span>
+                        <span><i class="fas fa-globe-africa"></i> AR</span>
+                    </div>
+                    <div class="data-card">
+                        <h3>Total Documents: ${data.length}</h3>
+                    </div>
+                    ${data.map(item => `
+                    <div class="data-card">
+                        <h3>Document #${item.BoNum || 'N/A'}</h3>
+                        <div class="data-value">
+                            <strong>Link:</strong> <a href="${item.BoUrl}" class="data-link" target="_blank">${item.BoUrl}</a>
+                        </div>
+                        <div class="data-value" style="display: flex; justify-content: flex-end; align-items: center; margin-top: 8px;">
+                            <button onclick="window.open('https://pdf2text-umber.vercel.app/api/pdf-text-all?pdfUrl=${item.BoUrl}', '_blank')" class="button" style="padding: 5px 10px; font-size: 12px; white-space: nowrap;">
+                                <i class="fas fa-file-alt"></i> Extract Text
+                            </button>
+                        </div>
+                        <div class="data-value">
+                            <strong>Date:</strong> ${new Date(item.BoDate).toLocaleDateString('fr-FR')}
+                        </div>
+                    </div>
+                    `).join('')}
+                    <!-- <div class="data-card">
+                        <h3>Raw Data</h3>
+                        <pre class="raw-data">${JSON.stringify(data, null, 2)}</pre>
+                    </div> -->
+                `;
+
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="result-header">
+                        <span class="result-title">Error</span>
+                        <span><i class="fas fa-exclamation-triangle" style="color: var(--danger)"></i></span>
+                    </div>
+                    <p style="color: var(--danger)">Error: ${error.message}</p>
+                `;
+            }
+        });
+
+        document.getElementById('fetchDataAllFr').addEventListener('click', async () => {
+            showLoading();
+            try {
+                const response = await fetch('/api/BO/ALL/FR');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const resultDiv = document.getElementById('result');
+
+                resultDiv.innerHTML = `
+                    <div class="result-header">
+                        <span class="result-title">French BO Data</span>
+                        <span><i class="fas fa-globe-europe"></i> FR</span>
+                    </div>
+                    <div class="data-card">
+                        <h3>Total Documents: ${data.length}</h3>
+                    </div>
+                    ${data.map(item => `
+                    <div class="data-card">
+                        <h3>Document #${item.BoNum || 'N/A'}</h3>
+                        <div class="data-value">
+                            <strong>Link:</strong> <a href="${item.BoUrl}" class="data-link" target="_blank">${item.BoUrl}</a>
+                        </div>
+                        <div class="data-value" style="display: flex; justify-content: flex-end; align-items: center; margin-top: 8px;">
+                            <button onclick="window.open('https://pdf2text-umber.vercel.app/api/pdf-text-all?pdfUrl=${item.BoUrl}', '_blank')" class="button" style="padding: 5px 10px; font-size: 12px; white-space: nowrap;">
+                                <i class="fas fa-file-alt"></i> Extract Text
+                            </button>
+                        </div>
+                        <div class="data-value">
+                            <strong>Date:</strong> ${new Date(item.BoDate).toLocaleDateString('fr-FR')}
+                        </div>
+                    </div>
+                    `).join('')}
+                    <!-- <div class="data-card">
+                        <h3>Raw Data</h3>
+                        <pre class="raw-data">${JSON.stringify(data, null, 2)}</pre>
+                    </div> -->
+                `;
+
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
+                    <div class="result-header">
+                        <span class="result-title">Error</span>
+                        <span><i class="fas fa-exclamation-triangle" style="color: var(--danger)"></i></span>
+                    </div>
+                    <p style="color: var(--danger)">Error: ${error.message}</p>
+                `;
+            }
+        });
+
+
+////////////////////////// Text Content of Latest Document //////////////////////////
+
+
         document.getElementById('fetchtextAr').addEventListener('click', async () => {
             showLoading();
             try {
@@ -449,6 +588,11 @@
                 `;
             }
         });
+  
+        
+/////////////////////////////////////////////////////////////////////////////////////
+
+
     </script>
 </body>
 </html>

@@ -19,6 +19,9 @@ app.use(express.json());
 
 
 
+
+
+
 ////////////////// FRENCH ////////////////////
 
 
@@ -90,8 +93,7 @@ async function GetBOfr(moduleId, tabId) {
     const headers = {
         "ModuleId": moduleId,
         "TabId": tabId,
-        "RequestVerificationToken": "",
-        "Cookie": ".ASPXANONYMOUS=7yujUKrb58vjlaZktvja5RzJnV-Svo0q_Dqdj4oC9WPvcdMHJ8NChSXyYGIDMcZeslYyFUi9mT_tG3VnjkKp0XcTDKVi7lXzH4hlii_Kw8lTr13U0"
+        "RequestVerificationToken": ""
     };
 
     try {
@@ -131,6 +133,59 @@ async function GetBOfr(moduleId, tabId) {
         return null;
     }
 }
+
+// Get History of French Bulletin Officiel
+async function GetMoreBOfr(moduleId, tabId) {
+    
+const url = "https://www.sgg.gov.ma/DesktopModules/MVC/TableListBO/BO/AjaxMethod";
+
+const headers = {
+    "ModuleId": moduleId,
+    "TabId": tabId,
+    "RequestVerificationToken": ""
+};
+
+
+    try {
+        const response = await axios.get(url, { headers });
+
+        
+        if (response.data && Array.isArray(response.data)) {
+            // Map all BOs to parsed format
+            const parsedBOs = response.data.map(bo => ({
+            BoId: bo.BoId,
+            BoNum: bo.BoNum,
+            BoDate: new Date(parseInt(bo.BoDate.match(/\d+/)[0], 10)), // Convert to Date object
+            BoUrl: bo.BoUrl.startsWith("https://www.sgg.gov.ma") ? bo.BoUrl : `https://www.sgg.gov.ma${bo.BoUrl}`
+            }));
+
+            console.log('All Parsed BOs Json:', parsedBOs);
+            return parsedBOs;
+        }
+
+        // console.log('Could not find All BO in response:', response.data);
+        return null;
+        
+        
+    } catch (error) {
+        
+        console.error('Error fetching data:', error.message);
+        if (error.response) {
+            console.error(`Status: ${error.response.status}`);
+            console.error(`Data: ${JSON.stringify(error.response.data)}`);
+            console.error('Headers:', JSON.stringify(error.response.headers));
+            if (error.config) {
+                console.error('Request URL:', error.config.url);
+                console.error('Request Method:', error.config.method);
+            }
+        }
+
+        return null;
+    }
+
+}
+
+
 
 // Route for french document
 app.get("/api/BO/FR", async (_, res) => {
@@ -194,7 +249,26 @@ app.get("/api/BO/Text/FR", async (_, res) => {
     }
 });
 
+// Route for All french documents
+app.get("/api/BO/ALL/FR", async (_, res) => {
 
+    try {
+        // First try to get ModuleId and TabId
+        const { moduleId, tabId } = await GetModuleIdTabIdFr();
+
+        // Use the dynamic ModuleId and TabId
+        const allbofr = await GetMoreBOfr(moduleId, tabId);
+
+        if (allbofr) {
+            res.json(allbofr); // Return parsed BO data
+        } else {
+            res.status(404).json({ error: "No French Bulletin Officiel was found" });
+        }
+    } catch (error) {
+        console.error("Error in /api/BO/ALL/FR:", error);
+        res.status(500).json({ error: "Failed to retrieve All French Bulletin Officiel" });
+    }
+});
 
 
 
@@ -269,8 +343,7 @@ async function GetBOar(moduleId, tabId) {
     const headers = {
         "ModuleId": moduleId,
         "TabId": tabId,
-        "RequestVerificationToken": "",
-        "Cookie": ".ASPXANONYMOUS=7yujUKrb58vjlaZktvja5RzJnV-Svo0q_Dqdj4oC9WPvcdMHJ8NChSXyYGIDMcZeslYyFUi9mT_tG3VnjkKp0XcTDKVi7lXzH4hlii_Kw8lTr13U0"
+        "RequestVerificationToken": ""
     };
 
     try {
@@ -309,6 +382,57 @@ async function GetBOar(moduleId, tabId) {
 
         return null;
     }
+}
+
+// Get History of Arabic Bulletin Officiel
+async function GetMoreBOar(moduleId, tabId) {
+    
+const url = "https://www.sgg.gov.ma/DesktopModules/MVC/TableListBO/BO/AjaxMethod";
+
+const headers = {
+    "ModuleId": moduleId,
+    "TabId": tabId,
+    "RequestVerificationToken": ""
+};
+
+
+    try {
+        const response = await axios.get(url, { headers });
+
+        
+        if (response.data && Array.isArray(response.data)) {
+            // Map all BOs to parsed format
+            const parsedBOs = response.data.map(bo => ({
+            BoId: bo.BoId,
+            BoNum: bo.BoNum,
+            BoDate: new Date(parseInt(bo.BoDate.match(/\d+/)[0], 10)), // Convert to Date object
+            BoUrl: bo.BoUrl.startsWith("https://www.sgg.gov.ma") ? bo.BoUrl : `https://www.sgg.gov.ma${bo.BoUrl}`
+            }));
+
+            console.log('All Parsed BOs Json:', parsedBOs);
+            return parsedBOs;
+        }
+
+        // console.log('Could not find All BO in response:', response.data);
+        return null;
+        
+        
+    } catch (error) {
+        
+        console.error('Error fetching data:', error.message);
+        if (error.response) {
+            console.error(`Status: ${error.response.status}`);
+            console.error(`Data: ${JSON.stringify(error.response.data)}`);
+            console.error('Headers:', JSON.stringify(error.response.headers));
+            if (error.config) {
+                console.error('Request URL:', error.config.url);
+                console.error('Request Method:', error.config.method);
+            }
+        }
+
+        return null;
+    }
+
 }
 
 // Route for Arabic document
@@ -373,6 +497,28 @@ app.get("/api/BO/Text/AR", async (_, res) => {
         res.status(500).json({ error: "Failed to retrieve Arabic Bulletin Officiel text" });
     }
 });
+
+// Route for All arabic documents
+app.get("/api/BO/ALL/AR", async (_, res) => {
+
+    try {
+        // First try to get ModuleId and TabId
+        const { moduleId, tabId } = await GetModuleIdTabIdAr();
+
+        // Use the dynamic ModuleId and TabId
+        const allboar = await GetMoreBOar(moduleId, tabId);
+
+        if (allboar) {
+            res.json(allboar); // Return parsed BO data
+        } else {
+            res.status(404).json({ error: "No Arabic Bulletin Officiel was found" });
+        }
+    } catch (error) {
+        console.error("Error in /api/BO/ALL/AR:", error);
+        res.status(500).json({ error: "Failed to retrieve All Arabic Bulletin Officiel" });
+    }
+});
+
 
 
 
