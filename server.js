@@ -1,0 +1,409 @@
+const express = require("express");
+const axios = require("axios");
+const cors = require("cors");
+const pdfParse = require('pdf-parse');
+const { JSDOM } = require('jsdom');
+const { fromBuffer } = require("pdf2pic");
+const path = require("path");
+
+// Using axios instead of node-fetch
+const app = express();
+
+// Enable CORS for all routes
+app.use(cors());
+
+// Parse JSON request bodies
+app.use(express.json());
+
+
+
+
+
+////////////////// FRENCH ////////////////////
+
+
+// Get ModuleId and TabId for French
+async function GetModuleIdTabIdFr() {
+    // Get current date
+    const today = new Date();
+    const year = String(today.getFullYear());
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+
+    const url = 'https://www.sgg.gov.ma/BulletinOfficiel.aspx';
+
+    // URL of the Bulletin Officiel website
+    console.log('Scraping URL:', url);
+
+    try {
+        // Fetch the website HTML using axios instead of fetch
+        const response = await axios.get(`https://aicrafters-scraper-api.vercel.app/scrape?url=${encodeURIComponent(url)}&type=scripts`, {
+            timeout: 10000 // 10 second timeout
+        });
+
+        if (!response.data) {
+            throw new Error('No data received from scraper API');
+        }
+
+        const result = response.data.result;
+
+    // Further processing of the retrieved data can be done here
+    // search for "ModuleId =" and "var TabId ="  using regex
+    
+    // Ensure result is a string before applying regex
+    const resultStr = String(result);
+    
+    // Find all occurrences of ModuleId using regex
+    const moduleIdMatches = [...resultStr.matchAll(/ModuleId\s*=\s*(\d+)/g)];
+    const tabIdMatches = [...resultStr.matchAll(/var TabId\s*=\s*(\d+)/g)];
+    
+    // Get the first TabId if available
+    const tabId = tabIdMatches.length > 0 ? tabIdMatches[0][1] : null;
+
+    // Find the smallest ModuleId
+    let moduleId = null;
+    if (moduleIdMatches.length > 0) {
+        moduleId = moduleIdMatches.reduce((min, match) => {
+            const current = parseInt(match[1], 10);
+            return current < min ? current : min;
+        }, parseInt(moduleIdMatches[0][1], 10)).toString();
+    }
+
+    console.log('Found ModuleIds:', moduleIdMatches.map(m => m[1]));
+    console.log('Found TabIds:', tabIdMatches.map(m => m[1]));
+    console.log('Selected ModuleId (smallest):', moduleId);
+    console.log('Selected TabId (first):', tabId);
+
+    return { moduleId, tabId };
+
+    } catch (error) {
+        console.error('Error in GetModuleIdTabIdFr:', error.message);
+        // Rethrow to allow proper error handling by caller
+        throw new Error(`Failed to get module and tab IDs: ${error.message}`);
+    }
+}
+
+// Get the latest Bulletin Officiel for French
+async function GetBOfr(moduleId, tabId) {
+
+    const url = "https://www.sgg.gov.ma/DesktopModules/MVC/TableListBO/BO/AjaxMethod";
+
+    const headers = {
+        "ModuleId": moduleId,
+        "TabId": tabId,
+        "RequestVerificationToken": "",
+        "Cookie": ".ASPXANONYMOUS=7yujUKrb58vjlaZktvja5RzJnV-Svo0q_Dqdj4oC9WPvcdMHJ8NChSXyYGIDMcZeslYyFUi9mT_tG3VnjkKp0XcTDKVi7lXzH4hlii_Kw8lTr13U0"
+    };
+
+    try {
+        const response = await axios.get(url, { headers });
+
+        if (response.data && Array.isArray(response.data)) {
+            const latestBO = response.data[0];
+
+            // Parse the data
+            const parsedBO = {
+                BoId: latestBO.BoId,
+                BoNum: latestBO.BoNum,
+                BoDate: new Date(parseInt(latestBO.BoDate.match(/\d+/)[0], 10)), // Convert to Date object
+                BoUrl: latestBO.BoUrl.startsWith("https://www.sgg.gov.ma") ? latestBO.BoUrl : `https://www.sgg.gov.ma${latestBO.BoUrl}`
+            };
+
+            console.log('Parsed BO:', parsedBO);
+            return parsedBO;
+        }
+
+        // console.log('Could not find latest BO in response:', response.data);
+        return null;
+
+    } catch (error) {
+
+        console.error('Error fetching data:', error.message);
+        if (error.response) {
+            console.error(`Status: ${error.response.status}`);
+            console.error(`Data: ${JSON.stringify(error.response.data)}`);
+            console.error('Headers:', JSON.stringify(error.response.headers));
+            if (error.config) {
+                console.error('Request URL:', error.config.url);
+                console.error('Request Method:', error.config.method);
+            }
+        }
+
+        return null;
+    }
+}
+
+// Route for french document
+app.get("/api/BO/FR", async (_, res) => {
+    try {
+        // First try to get ModuleId and TabId
+        const { moduleId, tabId } = await GetModuleIdTabIdFr();
+    
+        // If we got the IDs, use them, otherwise fall back to hardcoded values
+        const bofr = await GetBOfr(moduleId, tabId);
+        if (bofr) {
+            res.json(bofr); // Return parsed BO data
+        } else {
+            res.status(404).json({ error: "Latest Bulletin Officiel not found" });
+        }
+    } catch (error) {
+        console.error("Error in /api/BO/FR:", error);
+        res.status(500).json({ error: "Failed to retrieve French Bulletin Officiel" });
+    }
+});
+
+// Route for text inside French document
+app.get("/api/BO/Text/FR", async (_, res) => {
+    try {
+        
+        // First try to get ModuleId and TabId
+        const { moduleId, tabId } = await GetModuleIdTabIdFr();
+
+        // Use the dynamic ModuleId and TabId
+        const boar = await GetBOar(moduleId, tabId);
+
+        if (boar) {
+            //get link from results
+            const link = boar.BoUrl;
+
+            console.log('Link to latest Bulletin Officiel:', link);
+
+            // Fetch the text content from the link
+            const textContent = await fetch(`https://pdf2text-umber.vercel.app/api/pdf-text-all?pdfUrl=${encodeURIComponent(link)}`)
+                .then(response => response.json())
+                .then(data => data.text)
+                .catch(error => {
+                    console.error('Error fetching text content:', error);
+                    return null;
+                });
+
+            if (textContent) {
+
+                res.json({ text: textContent });
+                // console.log(textContent);
+                console.log('Text content retrieved successfully');
+            } else {
+                res.status(404).json({ error: "Text content not found" });
+            }
+        } else {
+            res.status(404).json({ error: "Latest Bulletin Officiel not found" });
+        }
+
+    } catch (error) {
+        console.error("Error in /api/BO/FR/Text:", error);
+        res.status(500).json({ error: "Failed to retrieve French Bulletin Officiel text" });
+    }
+});
+
+
+
+
+
+
+////////////////// ARABIC ////////////////////
+
+
+// Get ModuleId and TabId for Arabic
+async function GetModuleIdTabIdAr() {
+    // Get current date
+    const today = new Date();
+    const year = String(today.getFullYear());
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+
+    const url = 'https://www.sgg.gov.ma/arabe/BulletinOfficiel.aspx';
+
+    // URL of the Bulletin Officiel website
+    console.log('Scraping URL:', url);
+
+    try {
+        // Fetch the website HTML using axios instead of fetch
+        const response = await axios.get(`https://aicrafters-scraper-api.vercel.app/scrape?url=${encodeURIComponent(url)}&type=scripts`, {
+            timeout: 10000 // 10 second timeout
+        });
+
+        if (!response.data) {
+            throw new Error('No data received from scraper API');
+        }
+
+        const result = response.data.result;
+
+    // Further processing of the retrieved data can be done here
+    // search for "ModuleId =" and "var TabId ="  using regex
+    
+    // Ensure result is a string before applying regex
+    const resultStr = String(result);
+    
+    // Find all occurrences of ModuleId using regex
+    const moduleIdMatches = [...resultStr.matchAll(/ModuleId\s*=\s*(\d+)/g)];
+    const tabIdMatches = [...resultStr.matchAll(/var TabId\s*=\s*(\d+)/g)];
+    
+    // Get the first TabId if available
+    const tabId = tabIdMatches.length > 0 ? tabIdMatches[0][1] : null;
+    
+    // Find the biggest ModuleId
+    let moduleId = null;
+    if (moduleIdMatches.length > 0) {
+        moduleId = moduleIdMatches.reduce((max, match) => {
+            const current = parseInt(match[1], 10);
+            return current > max ? current : max;
+        }, parseInt(moduleIdMatches[0][1], 10)).toString();
+    }
+
+    console.log('Found ModuleIds:', moduleIdMatches.map(m => m[1]));
+    console.log('Found TabIds:', tabIdMatches.map(m => m[1]));
+    console.log('Selected ModuleId (biggest):', moduleId);
+    console.log('Selected TabId (first):', tabId);
+
+    return { moduleId, tabId };
+
+    } catch (error) {
+        console.error('Error in GetModuleIdTabIdFr:', error.message);
+        // Rethrow to allow proper error handling by caller
+        throw new Error(`Failed to get module and tab IDs: ${error.message}`);
+    }
+}
+
+// Get the latest Bulletin Officiel for Arabic
+async function GetBOar(moduleId, tabId) {
+    const url = "https://www.sgg.gov.ma/DesktopModules/MVC/TableListBO/BO/AjaxMethod";
+
+    const headers = {
+        "ModuleId": moduleId,
+        "TabId": tabId,
+        "RequestVerificationToken": "",
+        "Cookie": ".ASPXANONYMOUS=7yujUKrb58vjlaZktvja5RzJnV-Svo0q_Dqdj4oC9WPvcdMHJ8NChSXyYGIDMcZeslYyFUi9mT_tG3VnjkKp0XcTDKVi7lXzH4hlii_Kw8lTr13U0"
+    };
+
+    try {
+        const response = await axios.get(url, { headers });
+
+        if (response.data && Array.isArray(response.data)) {
+            const latestBO = response.data[0];
+
+            // Parse the data
+            const parsedBO = {
+                BoId: latestBO.BoId,
+                BoNum: latestBO.BoNum,
+                BoDate: new Date(parseInt(latestBO.BoDate.match(/\d+/)[0], 10)), // Convert to Date object
+                BoUrl: latestBO.BoUrl.startsWith("https://www.sgg.gov.ma") ? latestBO.BoUrl : `https://www.sgg.gov.ma${latestBO.BoUrl}`
+            };
+
+            console.log('Parsed BO:', parsedBO);
+            return parsedBO;
+        }
+
+        // console.log('Could not find latest BO in response:', response.data);
+        return null;
+
+    } catch (error) {
+
+        console.error('Error fetching data:', error.message);
+        if (error.response) {
+            console.error(`Status: ${error.response.status}`);
+            console.error(`Data: ${JSON.stringify(error.response.data)}`);
+            console.error('Headers:', JSON.stringify(error.response.headers));
+            if (error.config) {
+                console.error('Request URL:', error.config.url);
+                console.error('Request Method:', error.config.method);
+            }
+        }
+
+        return null;
+    }
+}
+
+// Route for Arabic document
+app.get("/api/BO/AR", async (_, res) => {
+    try {
+        // First try to get ModuleId and TabId
+        const { moduleId, tabId } = await GetModuleIdTabIdAr();
+        
+        // Use the dynamic ModuleId and TabId
+        const boar = await GetBOar(moduleId, tabId);
+        if (boar) {
+            res.json(boar); // Return parsed BO data
+        } else {
+            res.status(404).json({ error: "Latest Bulletin Officiel not found" });
+        }
+
+    } catch (error) {
+        console.error("Error in /api/BO/AR:", error);
+        res.status(500).json({ error: "Failed to retrieve Arabic Bulletin Officiel" });
+    }
+});
+
+// Route for text inside Arabic documents
+app.get("/api/BO/Text/AR", async (_, res) => {
+    try {
+        
+        // First try to get ModuleId and TabId
+        const { moduleId, tabId } = await GetModuleIdTabIdAr();
+        
+        // Use the dynamic ModuleId and TabId
+        const boar = await GetBOar(moduleId, tabId);
+
+        if (boar) {
+            //get link from results
+            const link = boar.BoUrl;
+
+            console.log('Link to latest Bulletin Officiel:', link);
+
+            // Fetch the text content from the link
+            const textContent = await fetch(`https://pdf2text-umber.vercel.app/api/pdf-text-all?pdfUrl=${encodeURIComponent(link)}`)
+                .then(response => response.json())
+                .then(data => data.text)
+                .catch(error => {
+                    console.error('Error fetching text content:', error);
+                    return null;
+                });
+
+            if (textContent) {
+
+                res.json({ text: textContent });
+                // console.log(textContent);
+                console.log('Text content retrieved successfully');
+            } else {
+                res.status(404).json({ error: "Text content not found" });
+            }
+        } else {
+            res.status(404).json({ error: "Latest Bulletin Officiel not found" });
+        }
+
+    } catch (error) {
+        console.error("Error in /api/BO/AR/Text:", error);
+        res.status(500).json({ error: "Failed to retrieve Arabic Bulletin Officiel text" });
+    }
+});
+
+
+
+
+
+
+
+
+app.get("/api/health", (_, res) => {
+    res.status(200).json({ status: "ok" });
+});
+
+// demo serve test.html
+app.get("/demo", (_, res) => {
+    res.sendFile(path.join(__dirname, "test.html"));
+});
+
+// Default route
+app.get("/", (_, res) => {
+     res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// Export for Vercel serverless function
+module.exports = app;
+
+// Start server if running directly (development)
+if (process.env.NODE_ENV !== 'production') {
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+        console.log(`🚀 Server is running on http://localhost:${PORT}`);
+    });
+}
+
+

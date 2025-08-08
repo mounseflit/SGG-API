@@ -1,0 +1,585 @@
+
+ <!DOCTYPE html>
+        <html>
+            <head>
+                <title>Bulletin Officiel API</title>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                <style>
+                    :root {
+                        --primary: #2563eb;
+                        --primary-dark: #1e40af;
+                        --secondary: #4f46e5;
+                        --accent: #f59e0b;
+                        --text: #1f2937;
+                        --text-light: #6b7280;
+                        --bg: #f9fafb;
+                        --white: #ffffff;
+                        --border: #e5e7eb;
+                        --shadow: rgba(0, 0, 0, 0.1);
+                        --french: #318CE7;
+                        --arabic: #1F9D55;
+                        --radius: 10px;
+                    }
+                    
+                    * {
+                        box-sizing: border-box;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    
+                    body { 
+                        font-family: 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, Oxygen, Ubuntu, sans-serif;
+                        color: var(--text);
+                        background: linear-gradient(135deg, #f6f7f9 0%, #eef1f5 100%);
+                        line-height: 1.7;
+                    }
+                    
+                    .container {
+                        max-width: 1200px;
+                        margin: 0 auto;
+                        padding: 0 24px;
+                    }
+                    
+                    .header {
+                        background: linear-gradient(120deg, var(--primary), var(--secondary));
+                        color: white;
+                        padding: 60px 0 80px;
+                        text-align: center;
+                        clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+                        margin-bottom: 40px;
+                    }
+                    
+                    .header h1 {
+                        font-size: 3rem;
+                        margin-bottom: 20px;
+                        letter-spacing: -0.5px;
+                    }
+                    
+                    .header p {
+                        font-size: 1.2rem;
+                        max-width: 700px;
+                        margin: 0 auto 30px;
+                        opacity: 0.9;
+                    }
+                    
+                    .header .highlight {
+                        color: var(--accent);
+                        font-weight: bold;
+                    }
+                    
+                    .btn {
+                        display: inline-block;
+                        background-color: var(--white);
+                        color: var(--primary);
+                        font-weight: 600;
+                        text-decoration: none;
+                        padding: 12px 24px;
+                        border-radius: 30px;
+                        transition: all 0.3s ease;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                        border: none;
+                        cursor: pointer;
+                        font-size: 1rem;
+                    }
+                    
+                    .btn:hover {
+                        transform: translateY(-3px);
+                        box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+                    }
+                    
+                    .btn-primary {
+                        background-color: var(--accent);
+                        color: white;
+                    }
+                    
+                    section {
+                        margin: 80px 0;
+                    }
+                    
+                    .section-title {
+                        text-align: center;
+                        margin-bottom: 50px;
+                        position: relative;
+                    }
+                    
+                    .section-title h2 {
+                        font-size: 2.2rem;
+                        margin-bottom: 15px;
+                        color: var(--primary-dark);
+                    }
+                    
+                    .section-title p {
+                        font-size: 1.1rem;
+                        color: var(--text-light);
+                        max-width: 700px;
+                        margin: 0 auto;
+                    }
+                    
+                    .section-title::after {
+                        content: "";
+                        display: block;
+                        width: 80px;
+                        height: 4px;
+                        background: linear-gradient(90deg, var(--primary), var(--secondary));
+                        margin: 20px auto 0;
+                        border-radius: 2px;
+                    }
+                    
+                    code {
+                        background: #2d3748;
+                        color: #e2e8f0;
+                        padding: 4px 8px;
+                        border-radius: 4px;
+                        font-family: 'Fira Code', 'Courier New', monospace;
+                        font-size: 0.9em;
+                    }
+                    
+                    pre {
+                        background: #2d3748;
+                        color: #e2e8f0;
+                        padding: 20px;
+                        border-radius: 10px;
+                        overflow-x: auto;
+                        font-family: 'Fira Code', 'Courier New', monospace;
+                        margin: 20px 0;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    }
+                    
+                    .endpoint {
+                        margin: 40px 0;
+                        padding: 30px;
+                        border-radius: var(--radius);
+                        background: white;
+                        box-shadow: 0 5px 15px var(--shadow);
+                        transition: transform 0.3s ease, box-shadow 0.3s ease;
+                    }
+                    
+                    .endpoint:hover {
+                        transform: translateY(-5px);
+                        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                    }
+                    
+                    .endpoint h3 {
+                        font-size: 1.5rem;
+                        margin-bottom: 15px;
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                    }
+                    
+                    .endpoint h3 i {
+                        font-size: 1.2em;
+                    }
+                    
+                    .french h3 {
+                        color: var(--french);
+                    }
+                    
+                    .arabic h3 {
+                        color: var(--arabic);
+                    }
+                    
+                    .method-badge {
+                        display: inline-block;
+                        padding: 4px 12px;
+                        border-radius: 20px;
+                        font-weight: bold;
+                        font-size: 0.8rem;
+                        margin-right: 10px;
+                        background-color: #10B981;
+                        color: white;
+                    }
+                    
+                    .endpoint-url {
+                        display: flex;
+                        align-items: center;
+                        background-color: #f1f5f9;
+                        padding: 12px 16px;
+                        border-radius: 8px;
+                        margin: 15px 0;
+                        overflow-x: auto;
+                    }
+                    
+                    .copy-btn {
+                        background: #e2e8f0;
+                        border: none;
+                        border-radius: 4px;
+                        padding: 6px 12px;
+                        margin-left: 10px;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        font-size: 0.85rem;
+                    }
+                    
+                    .copy-btn:hover {
+                        background: #cbd5e1;
+                    }
+                    
+                    .response-example {
+                        margin-top: 20px;
+                    }
+                    
+                    .response-example h4 {
+                        margin-bottom: 10px;
+                        font-size: 1.1rem;
+                        color: var(--text-light);
+                    }
+                    
+                    .try-btn {
+                        display: block;
+                        margin: 20px 0;
+                        padding: 10px 16px;
+                        background-color: #3b82f6;
+                        color: white;
+                        text-align: center;
+                        text-decoration: none;
+                        border-radius: 8px;
+                        transition: all 0.2s ease;
+                    }
+                    
+                    .try-btn:hover {
+                        background-color: #2563eb;
+                        transform: translateY(-2px);
+                    }
+                    
+                    .demo-section {
+                        display: flex;
+                        justify-content: center;
+                        margin: 40px 0;
+                    }
+                    
+                    .features {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                        gap: 30px;
+                        margin: 40px 0;
+                    }
+                    
+                    .feature-card {
+                        background: white;
+                        border-radius: var(--radius);
+                        padding: 30px;
+                        text-align: center;
+                        box-shadow: 0 5px 15px var(--shadow);
+                    }
+                    
+                    .feature-card i {
+                        font-size: 2.5rem;
+                        color: var(--primary);
+                        margin-bottom: 20px;
+                    }
+                    
+                    .feature-card h3 {
+                        font-size: 1.3rem;
+                        margin-bottom: 15px;
+                        color: var(--primary-dark);
+                    }
+                    
+                    .feature-card p {
+                        color: var(--text-light);
+                    }
+                    
+                    .footer {
+                        background-color: var(--primary-dark);
+                        color: white;
+                        padding: 40px 0;
+                        text-align: center;
+                        margin-top: 100px;
+                    }
+                    
+                    .footer p {
+                        opacity: 0.8;
+                        margin: 10px 0;
+                    }
+                    
+                    .language-label {
+                        display: inline-block;
+                        padding: 3px 10px;
+                        border-radius: 20px;
+                        font-size: 0.8rem;
+                        margin-left: 10px;
+                        font-weight: 600;
+                    }
+                    
+                    .lang-fr {
+                        background-color: rgba(49, 140, 231, 0.15);
+                        color: var(--french);
+                    }
+                    
+                    .lang-ar {
+                        background-color: rgba(31, 157, 85, 0.15);
+                        color: var(--arabic);
+                    }
+                    
+                    @media (max-width: 768px) {
+                        .header {
+                            padding: 40px 0 60px;
+                        }
+                        .header h1 {
+                            font-size: 2.2rem;
+                        }
+                        section {
+                            margin: 60px 0;
+                        }
+                        .section-title h2 {
+                            font-size: 1.8rem;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <header class="header">
+                    <div class="container">
+                        <h1>Bulletin Officiel <span class="highlight">API</span></h1>
+                        <p>A powerful, easy-to-use RESTful API for accessing and analyzing Moroccan Bulletin Officiel documents in both French and Arabic languages</p>
+                        <a href="/demo" class="btn btn-primary">
+                            <i class="fas fa-rocket"></i> Try Live Demo
+                        </a>
+                    </div>
+                </header>
+                
+                <div class="container">
+                    <section id="overview">
+                        <div class="section-title">
+                            <h2>API Overview</h2>
+                            <p>The Bulletin Officiel API provides comprehensive programmatic access to Morocco's official governmental publications, enabling developers to retrieve, search, and analyze legal documents, decrees, and announcements published by the Moroccan government. This RESTful API offers both metadata and full-text content from the latest bulletins in Arabic and French languages.</p>
+                        </div>
+                                                    
+                        <div class="features">
+                            <div class="feature-card">
+                                <i class="fas fa-globe"></i>
+                                <h3>Bilingual Support</h3>
+                                <p>Full access to both French and Arabic versions of the Bulletin Officiel</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-bolt"></i>
+                                <h3>Real-Time Updates</h3>
+                                <p>Always get the latest publications as soon as they're available</p>
+                            </div>
+                            <div class="feature-card">
+                                <i class="fas fa-file-alt"></i>
+                                <h3>Full Text Extraction</h3>
+                                <p>Extract and analyze the complete textual content of any bulletin</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="getting-started">
+                        <div class="section-title">
+                            <h2>Getting Started</h2>
+                            <p>Everything you need to start using the Bulletin Officiel API</p>
+                        </div>
+                        
+                        <div class="endpoint">
+                            <h3><i class="fas fa-link"></i> Base URL</h3>
+                            <p>All API requests should be made to the following base URL:</p>
+                            
+                            <div class="endpoint-url">
+                                <code>https://bo-ma-api.vercel.app</code>
+                                <button class="copy-btn" onclick="navigator.clipboard.writeText('https://bo-ma-api.vercel.app')">
+                                    Copy URL
+                                </button>
+                            </div>
+                            
+                            <p>Make sure to append the specific endpoint path to this base URL when making requests.</p>
+                        </div>
+                        
+                        <div class="endpoint">
+                            <h3><i class="fas fa-code"></i> Authentication</h3>
+                            <p>Currently, the API is available for public use without authentication requirements. However, rate limiting may apply to prevent abuse.</p>
+                            
+                            <div class="response-example">
+                                <h4>Example Request:</h4>
+                                <pre>curl https://bo-ma-api.vercel.app/api/BO/FR</pre>
+                            </div>
+                        </div>
+                    </section>
+                    
+                    <section id="french-api">
+                        <div class="section-title">
+                            <h2>French Bulletin API</h2>
+                            <p>Access the latest French language publications of the Bulletin Officiel</p>
+                        </div>
+                        
+                        <div class="endpoint french">
+                            <h3><i class="fas fa-file-pdf"></i> French Bulletin Metadata <span class="language-label lang-fr">French</span></h3>
+                            <p>Retrieve comprehensive metadata about the most recent French Bulletin Officiel publication.</p>
+                            
+                            <div class="endpoint-url">
+                                <span class="method-badge">GET</span>
+                                <code>/api/BO/FR</code>
+                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/BO/FR')">
+                                    Copy URL
+                                </button>
+                            </div>
+                            
+                            <p>This endpoint returns key metadata including the bulletin ID, number, publication date, and direct URL.</p>
+                            
+                            <div class="response-example">
+                                <h4>Example Response:</h4>
+                                <pre>{
+  "BoId": 5789,
+  "BoNum": "7214",
+  "BoDate": "2023-06-22T00:00:00.000Z",
+  "BoUrl": "https://www.sgg.gov.ma/Portals/0/BO/2023/BO_7214_Fr.pdf"
+}</pre>
+                            </div>
+                            
+                            <a href="/api/BO/FR" class="try-btn" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> Try this endpoint
+                            </a>
+                        </div>
+                        
+                        <div class="endpoint french">
+                            <h3><i class="fas fa-align-left"></i> French Bulletin Full Text <span class="language-label lang-fr">French</span></h3>
+                            <p>Extract the complete textual content from the latest French Bulletin Officiel.</p>
+                            
+                            <div class="endpoint-url">
+                                <span class="method-badge">GET</span>
+                                <code>/api/BO/Text/FR</code>
+                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/BO/Text/FR')">
+                                    Copy URL
+                                </button>
+                            </div>
+                            
+                            <p>This endpoint performs advanced text extraction from the PDF document, making the content available for search, analysis, or integration into your applications.</p>
+                            
+                            <div class="response-example">
+                                <h4>Example Response:</h4>
+                                <pre>{
+  "text": "ROYAUME DU MAROC BULLETIN OFFICIEL Édition de traduction officielle...[truncated]"
+}</pre>
+                            </div>
+                            
+                            <a href="/api/BO/Text/FR" class="try-btn" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> Try this endpoint
+                            </a>
+                        </div>
+                    </section>
+                    
+                    <section id="arabic-api">
+                        <div class="section-title">
+                            <h2>Arabic Bulletin API</h2>
+                            <p>Access the latest Arabic language publications of the Bulletin Officiel</p>
+                        </div>
+                        
+                        <div class="endpoint arabic">
+                            <h3><i class="fas fa-file-pdf"></i> Arabic Bulletin Metadata <span class="language-label lang-ar">Arabic</span></h3>
+                            <p>Retrieve comprehensive metadata about the most recent Arabic Bulletin Officiel publication.</p>
+                            
+                            <div class="endpoint-url">
+                                <span class="method-badge">GET</span>
+                                <code>/api/BO/AR</code>
+                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/BO/AR')">
+                                    Copy URL
+                                </button>
+                            </div>
+                            
+                            <p>This endpoint returns key metadata including the bulletin ID, number, publication date, and direct URL for Arabic publications.</p>
+                            
+                            <div class="response-example">
+                                <h4>Example Response:</h4>
+                                <pre>{
+  "BoId": 5790,
+  "BoNum": "7214",
+  "BoDate": "2023-06-22T00:00:00.000Z",
+  "BoUrl": "https://www.sgg.gov.ma/Portals/1/BO/2023/BO_7214_Ar.pdf"
+}</pre>
+                            </div>
+                            
+                            <a href="/api/BO/AR" class="try-btn" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> Try this endpoint
+                            </a>
+                        </div>
+                        
+                        <div class="endpoint arabic">
+                            <h3><i class="fas fa-align-right"></i> Arabic Bulletin Full Text <span class="language-label lang-ar">Arabic</span></h3>
+                            <p>Extract the complete textual content from the latest Arabic Bulletin Officiel.</p>
+                            
+                            <div class="endpoint-url">
+                                <span class="method-badge">GET</span>
+                                <code>/api/BO/Text/AR</code>
+                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/BO/Text/AR')">
+                                    Copy URL
+                                </button>
+                            </div>
+                            
+                            <p>This endpoint handles complex Arabic text extraction from PDF documents with proper RTL support, making the content available for search, analysis, or integration into your applications.</p>
+                            
+                            <div class="response-example">
+                                <h4>Example Response:</h4>
+                                <pre>{
+  "text": "المملكة المغربية الجريدة الرسمية النشرة العامة...[truncated]"
+}</pre>
+                            </div>
+                            
+                            <a href="/api/BO/Text/AR" class="try-btn" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> Try this endpoint
+                            </a>
+                        </div>
+                    </section>
+                    
+                    <section id="system-api">
+                        <div class="section-title">
+                            <h2>System Endpoints</h2>
+                            <p>API health and system information endpoints</p>
+                        </div>
+                        
+                        <div class="endpoint">
+                            <h3><i class="fas fa-heartbeat"></i> API Health Check</h3>
+                            <p>Verify the operational status of the API service.</p>
+                            
+                            <div class="endpoint-url">
+                                <span class="method-badge">GET</span>
+                                <code>/api/health</code>
+                                <button class="copy-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/api/health')">
+                                    Copy URL
+                                </button>
+                            </div>
+                            
+                            <p>Use this endpoint for monitoring the API's availability and uptime.</p>
+                            
+                            <div class="response-example">
+                                <h4>Example Response:</h4>
+                                <pre>{
+  "status": "ok"
+}</pre>
+                            </div>
+                            
+                            <a href="/api/health" class="try-btn" target="_blank">
+                                <i class="fas fa-external-link-alt"></i> Try this endpoint
+                            </a>
+                        </div>
+                    </section>
+                    
+                    <section class="demo-section">
+                        <a href="/demo" class="btn btn-primary" style="font-size: 1.2rem; padding: 16px 32px;">
+                            <i class="fas fa-play-circle"></i> Launch Interactive Demo
+                        </a>
+                    </section>
+                </div>
+                
+                <footer class="footer">
+                    <div class="container">
+                        <p>Bulletin Officiel API | Version 1.0.0</p>
+                        <p>© ${new Date().getFullYear()} All rights reserved</p>
+                    </div>
+                </footer>
+                
+                <script>
+                    // Add simple copy notification
+                    document.querySelectorAll('.copy-btn').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const originalText = this.innerText;
+                            this.innerText = 'Copied!';
+                            setTimeout(() => {
+                                this.innerText = originalText;
+                            }, 2000);
+                        });
+                    });
+                </script>
+            </body>
+        </html>
+    
