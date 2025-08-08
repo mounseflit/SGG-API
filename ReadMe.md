@@ -69,21 +69,22 @@ Access endpoints directly or use the demo at `/demo`.
 - Health check endpoint
 - Robust error handling and logging
 
+
 ## API Endpoints
 ### Metadata
-- `GET /api/BO/FR` — Returns JSON metadata for the latest French bulletin:
-	- `BoId`, `BoNum`, `BoDate`, `BoUrl`
-- `GET /api/BO/AR` — Returns JSON metadata for the latest Arabic bulletin:
-	- `BoId`, `BoNum`, `BoDate`, `BoUrl`
+- `GET /api/BO/FR` — Latest French bulletin metadata (`BoId`, `BoNum`, `BoDate`, `BoUrl`)
+- `GET /api/BO/AR` — Latest Arabic bulletin metadata (`BoId`, `BoNum`, `BoDate`, `BoUrl`)
+- `GET /api/BO/ALL/FR` — Array of metadata for all available French bulletins
+- `GET /api/BO/ALL/AR` — Array of metadata for all available Arabic bulletins
 
 ### Full Text Extraction
-- `GET /api/BO/Text/FR` — Returns `{ text: "..." }` with the full extracted text from the latest French PDF.
-- `GET /api/BO/Text/AR` — Returns `{ text: "..." }` with the full extracted text from the latest Arabic PDF.
+- `GET /api/BO/Text/FR` — `{ text: "..." }` full extracted text from the latest French PDF
+- `GET /api/BO/Text/AR` — `{ text: "..." }` full extracted text from the latest Arabic PDF
 
 ### System
-- `GET /api/health` — Returns `{ status: "ok" }` for health monitoring.
-- `GET /demo` — Interactive web demo.
-- `GET /` — API documentation page.
+- `GET /api/health` — `{ status: "ok" }` for health monitoring
+- `GET /demo` — Interactive web demo
+- `GET /` — API documentation page
 
 ### Example Response
 ```json
@@ -95,17 +96,38 @@ Access endpoints directly or use the demo at `/demo`.
 }
 ```
 
+### Example Array Response (All Bulletins)
+```json
+[
+	{
+		"BoId": 5789,
+		"BoNum": "7214",
+		"BoDate": "2023-06-22T00:00:00.000Z",
+		"BoUrl": "https://www.sgg.gov.ma/Portals/0/BO/2023/BO_7214_Fr.pdf"
+	},
+	...
+]
+```
+
+
 ## Error Handling
 - All endpoints return HTTP status codes (`200`, `404`, `500`).
 - Error responses include a JSON `{ error: "..." }` message.
 - Extensive logging for debugging (see `server.js`).
+- If an endpoint is unavailable or the source site changes, errors are returned with details for troubleshooting.
+
 
 ## Demo
 Launch the interactive demo at:
 ```
 http://localhost:3000/demo
 ```
-Try all endpoints visually and view formatted results. The demo uses AJAX to fetch and display live API data.
+or on production:
+```
+https://bo-ma-api.vercel.app/demo
+```
+Try all endpoints visually and view formatted results. The demo uses AJAX to fetch and display live API data, including historical bulletins.
+
 
 ## Dependencies
 - express
@@ -115,12 +137,14 @@ Try all endpoints visually and view formatted results. The demo uses AJAX to fet
 - jsdom
 - pdf2pic
 
+
 ## Contributing
 Pull requests and issues are welcome!
 1. Fork the repo and create your branch.
 2. Follow code style and add comments for new features.
 3. Test endpoints locally before submitting.
-4. Open a PR with a clear description.
+4. Document new endpoints and update the demo if needed.
+5. Open a PR with a clear description.
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
