@@ -1,46 +1,57 @@
-# DigiLaw Project
+
+# Bulletin Officiel API
 
 ## Overview
-DigiLaw API is a Node.js API service that extracts and processes text from Moroccan Bulletin Officiel PDFs. It provides endpoints to fetch specific pages or company data from the latest available bulletins.
+This API provides instant access to the latest Moroccan Bulletin Officiel publications in both French and Arabic. It offers endpoints for metadata and full-text extraction from official PDFs, with a modern web demo included.
 
 ## Table of Contents
 - [Installation](#installation)
 - [Usage](#usage)
 - [Features](#features)
 - [API Endpoints](#api-endpoints)
+- [Demo](#demo)
 - [License](#license)
 
 ## Installation
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/DigiLaw.git
 
 # Install dependencies
 npm install
 
-# Start the server
-npm start
+# Start the server (development)
+node server.js
+
 ```
 
 ## Usage
-The API can be accessed through HTTP requests to the following base URL:
+The API runs on:
 ```
 http://localhost:3000
 ```
+You can access endpoints directly or use the interactive demo at `/demo`.
 
 ## Features
-- PDF text extraction from Bulletin Officiel
-- Automatic latest bulletin detection
-- Page-specific text extraction
-- Company data processing
-- CORS enabled
-- Health check monitoring
+- Fetch latest Bulletin Officiel metadata (French & Arabic)
+- Extract full text from official PDFs (French & Arabic)
+- Modern, responsive web demo (`test.html`)
+- CORS enabled for easy integration
+- Health check endpoint
 
 ## API Endpoints
-- `GET /api/Digilaw/Page` - Extract text from specific page
-- `GET /api/Digilaw/Companies` - Process latest bulletin
-- `GET /api/Digilaw/health` - Check API status
-- `GET /` - API documentation
+- `GET /api/BO/FR` - Latest French Bulletin metadata
+- `GET /api/BO/Text/FR` - Full text of latest French Bulletin
+- `GET /api/BO/AR` - Latest Arabic Bulletin metadata
+- `GET /api/BO/Text/AR` - Full text of latest Arabic Bulletin
+- `GET /api/health` - API health status
+- `GET /demo` - Interactive web demo
+- `GET /` - API documentation page
+
+## Demo
+Launch the interactive demo at:
+```
+http://localhost:3000/demo
+```
+Try all endpoints visually and view formatted results.
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
