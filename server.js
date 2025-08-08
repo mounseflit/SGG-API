@@ -40,7 +40,7 @@ async function GetModuleIdTabIdFr() {
     try {
         // Fetch the website HTML using axios instead of fetch
         const response = await axios.get(`https://aicrafters-scraper-api.vercel.app/scrape?url=${encodeURIComponent(url)}&type=scripts`, {
-            timeout: 10000 // 10 second timeout
+            timeout: 5000 // 5 second timeout
         });
 
         if (!response.data) {
@@ -185,14 +185,23 @@ const headers = {
 
 }
 
-
-
 // Route for french document
 app.get("/api/BO/FR", async (_, res) => {
     try {
-        // First try to get ModuleId and TabId
-        const { moduleId, tabId } = await GetModuleIdTabIdFr();
-    
+        
+        // First try to get ModuleId and TabId, use constant values if function fails
+        let moduleId, tabId;
+        try {
+            const result = await GetModuleIdTabIdFr();
+            moduleId = result.moduleId;
+            tabId = result.tabId;
+        } catch (error) {
+            console.log('Failed to get dynamic IDs, using fallback values:', error.message);
+            moduleId = "2873";
+            tabId = "775";
+        }
+
+
         // If we got the IDs, use them, otherwise fall back to hardcoded values
         const bofr = await GetBOfr(moduleId, tabId);
         if (bofr) {
@@ -210,8 +219,18 @@ app.get("/api/BO/FR", async (_, res) => {
 app.get("/api/BO/Text/FR", async (_, res) => {
     try {
         
-        // First try to get ModuleId and TabId
-        const { moduleId, tabId } = await GetModuleIdTabIdFr();
+        // First try to get ModuleId and TabId, use constant values if function fails
+        let moduleId, tabId;
+        try {
+            const result = await GetModuleIdTabIdFr();
+            moduleId = result.moduleId;
+            tabId = result.tabId;
+        } catch (error) {
+            console.log('Failed to get dynamic IDs, using fallback values:', error.message);
+            moduleId = "2873";
+            tabId = "775";
+        }
+
 
         // Use the dynamic ModuleId and TabId
         const boar = await GetBOar(moduleId, tabId);
@@ -253,8 +272,19 @@ app.get("/api/BO/Text/FR", async (_, res) => {
 app.get("/api/BO/ALL/FR", async (_, res) => {
 
     try {
-        // First try to get ModuleId and TabId
-        const { moduleId, tabId } = await GetModuleIdTabIdFr();
+
+        // First try to get ModuleId and TabId, use constant values if function fails
+        let moduleId, tabId;
+        try {
+            const result = await GetModuleIdTabIdFr();
+            moduleId = result.moduleId;
+            tabId = result.tabId;
+        } catch (error) {
+            console.log('Failed to get dynamic IDs, using fallback values:', error.message);
+            moduleId = "2873";
+            tabId = "775";
+        }
+
 
         // Use the dynamic ModuleId and TabId
         const allbofr = await GetMoreBOfr(moduleId, tabId);
@@ -291,7 +321,7 @@ async function GetModuleIdTabIdAr() {
     try {
         // Fetch the website HTML using axios instead of fetch
         const response = await axios.get(`https://aicrafters-scraper-api.vercel.app/scrape?url=${encodeURIComponent(url)}&type=scripts`, {
-            timeout: 10000 // 10 second timeout
+            timeout: 5000 // 5 second timeout
         });
 
         if (!response.data) {
@@ -438,9 +468,20 @@ const headers = {
 // Route for Arabic document
 app.get("/api/BO/AR", async (_, res) => {
     try {
-        // First try to get ModuleId and TabId
-        const { moduleId, tabId } = await GetModuleIdTabIdAr();
-        
+
+        // First try to get ModuleId and TabId, use constant values if function fails
+        let moduleId, tabId;
+        try {
+            const result = await GetModuleIdTabIdAr();
+            moduleId = result.moduleId;
+            tabId = result.tabId;
+        } catch (error) {
+            console.log('Failed to get dynamic IDs, using fallback values:', error.message);
+            moduleId = "3111";
+            tabId = "847";
+        }
+
+
         // Use the dynamic ModuleId and TabId
         const boar = await GetBOar(moduleId, tabId);
         if (boar) {
@@ -459,9 +500,19 @@ app.get("/api/BO/AR", async (_, res) => {
 app.get("/api/BO/Text/AR", async (_, res) => {
     try {
         
-        // First try to get ModuleId and TabId
-        const { moduleId, tabId } = await GetModuleIdTabIdAr();
-        
+        // First try to get ModuleId and TabId, use constant values if function fails
+        let moduleId, tabId;
+        try {
+            const result = await GetModuleIdTabIdAr();
+            moduleId = result.moduleId;
+            tabId = result.tabId;
+        } catch (error) {
+            console.log('Failed to get dynamic IDs, using fallback values:', error.message);
+            moduleId = "3111";
+            tabId = "847";
+        }
+
+
         // Use the dynamic ModuleId and TabId
         const boar = await GetBOar(moduleId, tabId);
 
@@ -502,8 +553,18 @@ app.get("/api/BO/Text/AR", async (_, res) => {
 app.get("/api/BO/ALL/AR", async (_, res) => {
 
     try {
-        // First try to get ModuleId and TabId
-        const { moduleId, tabId } = await GetModuleIdTabIdAr();
+        // First try to get ModuleId and TabId, use constant values if function fails
+        let moduleId, tabId;
+        try {
+            const result = await GetModuleIdTabIdAr();
+            moduleId = result.moduleId;
+            tabId = result.tabId;
+        } catch (error) {
+            console.log('Failed to get dynamic IDs, using fallback values:', error.message);
+            moduleId = "3111";
+            tabId = "847";
+        }
+
 
         // Use the dynamic ModuleId and TabId
         const allboar = await GetMoreBOar(moduleId, tabId);
